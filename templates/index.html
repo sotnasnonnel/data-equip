@@ -36,15 +36,15 @@
             <div class="col-md-4 form-container animate__animated animate__fadeInLeft">
                 <form action="{{ url_for('add_equipamento') }}" method="post">
                     <div class="form-group">
-                        <label for="nome">Motorista:</label>
+                        <label for="nome">Nome:</label>
                         <input type="text" id="nome" name="nome" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="quantidade">Quantidade Viagens:</label>
+                        <label for="quantidade">Quantidade:</label>
                         <input type="number" id="quantidade" name="quantidade" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="equipamento">Nome Equipamento:</label>
+                        <label for="equipamento">Equipamento:</label>
                         <input type="text" id="equipamento" name="equipamento" class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Adicionar</button>
@@ -59,9 +59,9 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Motorista</th>
-                            <th>Qtd Viagens</th>
-                            <th>Nome Equip</th>
+                            <th>Nome</th>
+                            <th>Quantidade</th>
+                            <th>Equipamento</th>
                         </tr>
                     </thead>
                     <tbody>
