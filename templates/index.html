@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Equipamento</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        .container {
+            margin-top: 20px;
+        }
+        .form-container, .table-container, .graph-container {
+            margin: 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary, .btn-danger, .btn-success {
+            width: 100%;
+        }
+        .table-container table {
+            animation: fadeIn 2s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center animate__animated animate__fadeInDown">Adicionar Equipamento</h1>
+        <div class="row">
+            <div class="col-md-4 form-container animate__animated animate__fadeInLeft">
+                <form action="{{ url_for('add_equipamento') }}" method="post">
+                    <div class="form-group">
+                        <label for="nome">Motorista:</label>
+                        <input type="text" id="nome" name="nome" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade">Quantidade Viagens:</label>
+                        <input type="number" id="quantidade" name="quantidade" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="equipamento">Nome Equipamento:</label>
+                        <input type="text" id="equipamento" name="equipamento" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+                <form action="{{ url_for('delete_equipamentos') }}" method="post" style="margin-top: 10px;">
+                    <button type="submit" class="btn btn-danger">Excluir Todos os Dados</button>
+                </form>
+            </div>
+            <div class="col-md-4 table-container animate__animated animate__fadeInUp">
+                <h2>Lista de Equipamentos</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Motorista</th>
+                            <th>Qtd Viagens</th>
+                            <th>Nome Equip</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipamento in equipamentos %}
+                        <tr>
+                            <td>{{ equipamento[0] }}</td>
+                            <td>{{ equipamento[1] }}</td>
+                            <td>{{ equipamento[2] }}</td>
+                            <td>{{ equipamento[3] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{{ url_for('export') }}" class="btn btn-success">Exportar para Excel</a>
+            </div>
+            <div class="col-md-4 graph-container animate__animated animate__fadeInRight">
+                <h2>Análise de Equipamentos PHD</h2>
+                {% if graph_html %}
+                    <div>{{ graph_html|safe }}</div>
+                {% else %}
+                    <p>Nenhum dado disponível para exibir o gráfico.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
