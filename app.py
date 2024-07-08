@@ -1,21 +1,31 @@
 import streamlit as st
-import sqlite3
+import mysql.connector
 import pandas as pd
 import plotly.express as px
 
+# Configurações do banco de dados
+db_config = {
+    'user': 'root',
+    'password': 'UvsLRfnxzfIHdIZVdXkoiDEeKxwRxPgE',
+    'host': 'containers-us-west-94.railway.app',
+    'port': 29533,
+    'database': 'railway'
+}
+
 # Função para inicializar o banco de dados
 def init_db():
-    conn = sqlite3.connect('database.db')
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS equipamentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            quantidade INTEGER NOT NULL,
-            equipamento TEXT NOT NULL
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL,
+            quantidade INT NOT NULL,
+            equipamento VARCHAR(255) NOT NULL
         )
     ''')
     conn.commit()
+    cursor.close()
     conn.close()
 
 # Inicializar o banco de dados
@@ -32,30 +42,33 @@ with st.form(key='add_equipamento'):
     submit_button = st.form_submit_button(label='Adicionar')
 
     if submit_button:
-        conn = sqlite3.connect('database.db')
+        conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO equipamentos (nome, quantidade, equipamento)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         ''', (nome, quantidade, equipamento))
         conn.commit()
+        cursor.close()
         conn.close()
         st.success('Equipamento adicionado com sucesso!')
 
 # Botão para excluir todos os dados
 if st.button('Excluir Todos os Dados'):
-    conn = sqlite3.connect('database.db')
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM equipamentos')
     conn.commit()
+    cursor.close()
     conn.close()
     st.warning('Todos os dados foram excluídos!')
 
 # Exibir lista de equipamentos
-conn = sqlite3.connect('database.db')
+conn = mysql.connector.connect(**db_config)
 cursor = conn.cursor()
 cursor.execute('SELECT * FROM equipamentos')
 equipamentos = cursor.fetchall()
+cursor.close()
 conn.close()
 
 if equipamentos:
@@ -70,8 +83,8 @@ else:
 
 # Botão para exportar dados para Excel
 if st.button('Exportar para Excel'):
-    conn = sqlite3.connect('database.db')
-    df = pd.read_sql_query('SELECT * FROM equipamentos', conn)
+    conn = mysql.connector.connect(**db_config)
+    df = pd.read_sql('SELECT * FROM equipamentos', conn)
     conn.close()
     
     file_path = 'equipamentos.xlsx'
