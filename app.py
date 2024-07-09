@@ -2,6 +2,16 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pymongo import MongoClient, errors
+import requests
+
+# Função para obter o IP público do servidor
+def get_public_ip():
+    try:
+        response = requests.get('https://api.ipify.org?format=json')
+        ip_data = response.json()
+        return ip_data['ip']
+    except requests.RequestException:
+        return None
 
 # Função para inicializar a conexão com o MongoDB
 def get_mongo_client():
@@ -9,7 +19,6 @@ def get_mongo_client():
     password = "7d5b6r77"
     cluster_address = "teste.baoswin.mongodb.net"
     dbname = "teste"
-    # Certifique-se de que a senha está URL-encoded se contiver caracteres especiais
     DATABASE_URL = f"mongodb+srv://{username}:{password}@{cluster_address}/?retryWrites=true&w=majority&appName=teste"
     client = MongoClient(DATABASE_URL, serverSelectionTimeoutMS=5000)  # 5 segundos de timeout
     try:
@@ -18,6 +27,13 @@ def get_mongo_client():
     except errors.ServerSelectionTimeoutError as err:
         st.error(f"Erro ao conectar ao MongoDB: {err}")
         return None
+
+# Obter o IP público do servidor e exibi-lo
+public_ip = get_public_ip()
+if public_ip:
+    st.info(f"IP público do servidor: {public_ip}")
+else:
+    st.warning("Não foi possível obter o IP público do servidor.")
 
 # Inicializar a conexão com o MongoDB
 client = get_mongo_client()
