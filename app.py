@@ -1,25 +1,23 @@
 import streamlit as st
-import sqlite3
 import pandas as pd
 import plotly.express as px
+from pymongo import MongoClient
 
-# Função para inicializar o banco de dados
-def init_db():
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS equipamentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            quantidade INTEGER NOT NULL,
-            equipamento TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# Função para inicializar a conexão com o MongoDB
+def get_mongo_client():
+    username = "lennonmms7"
+    password = "7d5b6r77"
+    cluster_address = "teste.baoswin.mongodb.net"
+    dbname = "teste" 
+    # Certifique-se de que a senha está URL-encoded se contiver caracteres especiais
+    DATABASE_URL = f"mongodb+srv://{username}:{password}@{cluster_address}/?retryWrites=true&w=majority&appName=teste"
+    client = MongoClient(DATABASE_URL)
+    return client
 
-# Inicializar o banco de dados
-init_db()
+# Inicializar a conexão com o MongoDB
+client = get_mongo_client()
+db = client['teste']  
+equipamentos_collection = db['equipamentos']
 
 # Título da página
 st.title('Adicionar Equipamento')
@@ -32,50 +30,36 @@ with st.form(key='add_equipamento'):
     submit_button = st.form_submit_button(label='Adicionar')
 
     if submit_button:
-        conn = sqlite3.connect('database.db')
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO equipamentos (nome, quantidade, equipamento)
-            VALUES (?, ?, ?)
-        ''', (nome, quantidade, equipamento))
-        conn.commit()
-        conn.close()
+        equipamentos_collection.insert_one({
+            'nome': nome,
+            'quantidade': quantidade,
+            'equipamento': equipamento
+        })
         st.success('Equipamento adicionado com sucesso!')
 
 # Botão para excluir todos os dados
 if st.button('Excluir Todos os Dados'):
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM equipamentos')
-    conn.commit()
-    conn.close()
+    equipamentos_collection.delete_many({})
     st.warning('Todos os dados foram excluídos!')
 
 # Exibir lista de equipamentos
-conn = sqlite3.connect('database.db')
-cursor = conn.cursor()
-cursor.execute('SELECT * FROM equipamentos')
-equipamentos = cursor.fetchall()
-conn.close()
+equipamentos = list(equipamentos_collection.find())
 
 if equipamentos:
-    df = pd.DataFrame(equipamentos, columns=['ID', 'Nome', 'Quantidade', 'Equipamento'])
+    df = pd.DataFrame(equipamentos, columns=['_id', 'nome', 'quantidade', 'equipamento'])
     st.table(df)
 
     # Criar gráfico usando Plotly
-    fig = px.bar(df, x='Equipamento', y='Quantidade', color='Nome', title='Quantidade de Equipamentos por Nome')
+    fig = px.bar(df, x='equipamento', y='quantidade', color='nome', title='Quantidade de Equipamentos por Nome')
     st.plotly_chart(fig)
 else:
     st.write('Nenhum equipamento adicionado.')
 
 # Botão para exportar dados para Excel
 if st.button('Exportar para Excel'):
-    conn = sqlite3.connect('database.db')
-    df = pd.read_sql_query('SELECT * FROM equipamentos', conn)
-    conn.close()
-    
+    df = pd.DataFrame(equipamentos)
     file_path = 'equipamentos.xlsx'
     df.to_excel(file_path, index=False)
-    
+
     with open(file_path, 'rb') as file:
         st.download_button(label='Download Excel', data=file, file_name='equipamentos.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
