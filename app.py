@@ -42,6 +42,7 @@ if client:
     equipamentos_collection = db['equipamentos']
 
     # Título da página
+    st.write('Essa página é um exemplo para adicionar equipamentos em uma base de dados SQL, e instantaneamente criado um gráfico, e é adicionada as informações em uma tabela.')
     st.title('Adicionar Equipamento')
 
     # Formulário para adicionar equipamentos
